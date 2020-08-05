@@ -430,7 +430,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                     torch.distributed.all_reduce(l2_grad_norm_sq, group=self._l2_grad_norm_pg)
                     self._L2_grad_norm = l2_grad_norm_sq.sqrt().item()
                 else: # count gradients of model_parallel parameters only
-                    l2_grad_norm_sq = torch.zeros(size=[self._model_params_num], dtype=torch.float32, device='cuda')
+                    l2_grad_norm_sq = torch.zeros(size=[len(self._contrib_grads_for_norm)], dtype=torch.float32, device='cuda')
                     local_contrib_l2_norm = multi_tensor_applier(self.multi_tensor_l2norm, self._overflow_buf, [self._contrib_grads_for_norm], True)[1] ** 2
                     l2_grad_norm_sq.masked_scatter_(self._contrib_grads_for_norm_is_parallel, local_contrib_l2_norm)
                     torch.distributed.all_reduce(l2_grad_norm_sq, group=self._l2_grad_norm_pg)
