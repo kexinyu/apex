@@ -70,7 +70,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
         global fused_adam_cuda, distributed_adam_cuda
         fused_adam_cuda = importlib.import_module("fused_adam_cuda")
         distributed_adam_cuda = importlib.import_module("distributed_adam_cuda")
-        self.multi_tensor_fused_adam = distributed_adam_cuda.multi_tensor_fused_adam
+        self.multi_tensor_l2norm = amp_C.multi_tensor_l2norm
 
         self._amp_scale_adjustment = amp_scale_adjustment
 
@@ -252,12 +252,15 @@ class DistributedFusedAdam(torch.optim.Optimizer):
         self._packed_flat_to_model_params = []
         self._contrib_tensor_list = []
         self._contrib_group_properties = []
+        self._model_params_num = len(self._model_params)
+        self._model_param_is_parallel = [True]*self._model_params_num
+        self._contrib_grads_for_norm = []
         for shard_id in range(self._group_size):
             for block_id in range(self._num_blocks):
                 for chunk_id in range(self._num_chunks):
                     flat_shard_start = (((block_id * self._num_chunks + chunk_id) * self._group_size) + shard_id) * self._shard_size
                     flat_shard_end = flat_shard_start + self._shard_size
-                    for (p, grads_info, group_props) in zip(self._model_params, self._grads_info, self._group_properties):
+                    for param_i, (p, grads_info, group_props) in enumerate(zip(self._model_params, self._grads_info, self._group_properties)):
                         flat_grad_start = grads_info["param_offset"]
                         flat_grad_end = flat_grad_start + grads_info["param_grads_size"]
                         clipped_start = (lambda a,b: a if a > b else b)(flat_grad_start, flat_shard_start)
@@ -270,6 +273,8 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                             new_param_packed_fragment = self._new_params_mega_chunks[shard_id][block_id][chunk_id][shard_offset:shard_offset+grad_length]
                             self._packed_flat_to_model_params.append( (new_param_packed_fragment, model_param_fragment) )
                             if shard_id == self._group_rank:
+                                if p.model_parallel is not None:
+                                    self._model_param_is_parallel[param_i] = p.mode_parallel
                                 # copy model parameters into master buffer
                                 master_param_fragment = self._fp32_p_chunks[block_id][chunk_id][shard_offset:shard_offset+grad_length]
                                 opti_state_m_fragment = self._fp32_m_chunks[block_id][chunk_id][shard_offset:shard_offset+grad_length]
@@ -280,6 +285,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                                 master_param_fragment.copy_(model_param_fragment)
                                 self._contrib_group_properties.append(group_props)
                                 self._contrib_tensor_list.append((master_param_fragment, opti_state_m_fragment, opti_state_v_fragment, opti_state_g_fragment, opti_state_p_fragment)) # p, m, v, g, p_copy
+                                self._contrib_grads_for_norm.append(opti_state_g_fragment) # g
 
         p, m, v, g, p_copy = list(zip(*self._contrib_tensor_list))
         self._contrib_tensor_list = [p, m, v, g, p_copy]
@@ -291,6 +297,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
         self._contrib_bias_correction = torch.tensor(bias_correction, dtype=torch.int, device='cuda')
         self._contrib_epsilon = torch.tensor(epsilon, dtype=math_type, device='cuda')
         self._contrib_weight_decay = torch.tensor(decay, dtype=math_type, device='cuda')
+        self._model_param_is_parallel = torch.tensor(self._model_param_is_parallel, dtype=torch.bool, device='cuda')
 
         p_in, p_out = zip(*self._packed_flat_to_model_params)
         self._packed_flat_to_model_params = [p_in, p_out]
@@ -416,10 +423,22 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                     for chunk_id in range(self._num_chunks):
                         self._reductions_works[block_id][chunk_id].wait()
                 # Since the packed format is contiguous after reductions, only one norm is needed
-                l2_grad_norm_sq = torch.empty([1], device='cuda')
-                l2_grad_norm_sq = self._fp16_g.norm(dtype=torch.float32, p=2)**2
-                torch.distributed.all_reduce(l2_grad_norm_sq, group=self._l2_grad_norm_pg)
-                self._L2_grad_norm = l2_grad_norm_sq.sqrt().item()
+                if self._process_group_id == 0: # count all gradients regardless of model_parallel attribute
+                    l2_grad_norm_sq = torch.empty([1], device='cuda')
+                    l2_grad_norm_sq = self._fp16_g.norm(dtype=torch.float32, p=2)**2
+                    torch.distributed.all_reduce(l2_grad_norm_sq, group=self._l2_grad_norm_pg)
+                    self._L2_grad_norm = l2_grad_norm_sq.sqrt().item()
+                else: # count gradients of model_parallel parameters only
+                    l2_grad_norm_sq = torch.zeros(size=[self._model_params_num], dtype=torch.float32, device='cuda')
+                    local_contrib_l2_norm = multi_tensor_applier(self.multi_tensor_l2norm, self._overflow_buf, [self._contrib_grads_for_norm], True)[1] ** 2
+                    l2_grad_norm_sq.masked_scatter_(self._model_param_is_parallel, local_contrib_l2_norm)
+                    torch.distributed.all_reduce(l2_grad_norm_sq, group=self._l2_grad_norm_pg)
+                    self._L2_grad_norm = l2_grad_norm_sq.sum().sqrt().item()
+
+                    #local_contrib_l2_norm = multi_tensor_applier(self.multi_tensor_l2norm, self._overflow_buf, [self._contrib_grads_for_norm], True)[1] ** 2
+                    #l2_norm_norm_sq = local_contrib_l2_norm.masked_select(self._model_param_is_parallel)
+                    #torch.distributed.all_reduce(l2_norm_norm_sq, group=self._l2_grad_norm_pg)
+                    #self._L2_grad_norm = l2_grad_norm_sq.sum().sqrt().item()
 
     def __launch_step_kernel(self):
         combined_scale = self._global_scale
@@ -427,7 +446,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
             combined_scale = self._param_group['max_grad_norm'] / (self.L2_grad_norm / self._global_scale + 1e-6)
             combined_scale = self._global_scale / min(1, combined_scale)
         
-        multi_tensor_applier(self.multi_tensor_fused_adam,
+        multi_tensor_applier(distributed_adam_cuda.multi_tensor_fused_adam,
                 self._overflow_buf,
                 self._contrib_tensor_list, # p, m, v, g, p_copy
                 self._contrib_beta1,
