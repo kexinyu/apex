@@ -274,7 +274,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                             self._packed_flat_to_model_params.append( (new_param_packed_fragment, model_param_fragment) )
                             if shard_id == self._group_rank:
                                 if p.model_parallel is not None:
-                                    self._model_param_is_parallel[param_i] = p.mode_parallel
+                                    self._model_param_is_parallel[param_i] = p.model_parallel
                                 # copy model parameters into master buffer
                                 master_param_fragment = self._fp32_p_chunks[block_id][chunk_id][shard_offset:shard_offset+grad_length]
                                 opti_state_m_fragment = self._fp32_m_chunks[block_id][chunk_id][shard_offset:shard_offset+grad_length]
