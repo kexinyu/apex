@@ -36,6 +36,7 @@ def lazy_init_with_master_weights(self):
             fp32_params_this_group = []
             fp32_from_fp16_params_this_group = []
             for i, param in enumerate(param_group['params']):
+                print("param in lazy init:", param)
                 if param.requires_grad:
                     if param.type() == 'torch.cuda.HalfTensor':
                         # maybe_print("FP16_Optimizer received torch.cuda.HalfTensor with {}"
