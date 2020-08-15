@@ -41,7 +41,7 @@ def lazy_init_with_master_weights(self):
                         # maybe_print("FP16_Optimizer received torch.cuda.HalfTensor with {}"
                         #             .format(param.size()))
                         fp16_params_this_group.append(param)
-                        master_param = param.detach().clone().float()
+                        master_param = param.detach().clone()#.float()
                         master_param.requires_grad = True
                         param_group['params'][i] = master_param
                         fp32_from_fp16_params_this_group.append(master_param)
