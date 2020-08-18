@@ -124,10 +124,14 @@ void multi_tensor_lamb_stage1_cuda(
   using namespace at;
 
   const float* g_grad_norm = global_grad_norm.DATA_PTR<float>();
+  std::cout << "print1" << std::endl;
   float clipped_global_grad_norm = *(g_grad_norm) > max_global_grad_norm ? *(g_grad_norm) / max_global_grad_norm : 1.0f;
+  std::cout << "print2" << std::endl;
   float next_step = float(step+1);
+  std::cout << "print3" << std::endl;
   float beta1_correction = 1.0f - std::pow(beta1, next_step);
   float beta2_correction = 1.0f - std::pow(beta2, next_step);
+  std::cout << "print4" << std::endl;
   DISPATCH_FLOAT_AND_HALF(tensor_lists[0][0].scalar_type(), 0, "lamb_stage_1",
     DISPATCH_FLOAT_AND_HALF(tensor_lists[1][0].scalar_type(), 1, "lamb_stage_1",
       DISPATCH_FLOAT_AND_HALF(tensor_lists[4][0].scalar_type(), 2, "lamb_stage_1",
@@ -145,6 +149,7 @@ void multi_tensor_lamb_stage1_cuda(
           epsilon,
           clipped_global_grad_norm); )))
 
+  std::cout << "print5" << std::endl;
   AT_CUDA_CHECK(cudaGetLastError());
 
   // AT_CUDA_CHECK(cudaDeviceSynchronize());
