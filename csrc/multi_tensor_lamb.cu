@@ -396,11 +396,11 @@ void multi_tensor_lamb_cuda(
 
   std::cout << "update:";
   for (int i = 0; i < 10; ++i) {
-      std::cout << grad_list[i] << " ";
+      std::cout << grad_list[i].item() << " ";
   }
   std::cout << std::endl;
-  std::cout << "ref param norm:" << std::get<1>(param_norm_tuple) << std::endl;
-  std::cout << "ref update norm:" << std::get<1>(update_norm_tuple) << std::endl;
+  std::cout << "ref param norm:" << std::get<0>(param_norm_tuple).item() << std::endl;
+  std::cout << "ref update norm:" << std::get<0>(update_norm_tuple).item() << std::endl;
 
   std::vector<std::vector<at::Tensor>> grad_param_list(tensor_lists.begin(), tensor_lists.begin()+2);
 
