@@ -124,7 +124,7 @@ void multi_tensor_lamb_stage1_cuda(
   using namespace at;
 
   std::cout << "print1" << std::endl;
-  float clipped_global_grad_norm = *(g_grad_norm) > max_global_grad_norm ? *(g_grad_norm) / max_global_grad_norm : 1.0f;
+  float clipped_global_grad_norm = g_grad_norm > max_global_grad_norm ? g_grad_norm / max_global_grad_norm : 1.0f;
   std::cout << "print2" << std::endl;
   float next_step = float(step+1);
   std::cout << "print3" << std::endl;
