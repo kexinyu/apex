@@ -394,12 +394,6 @@ void multi_tensor_lamb_cuda(
   // Compute update norms
   auto update_norm_tuple = multi_tensor_l2norm_cuda(chunk_size, noop_flag, grad_list, true);
 
-  std::cout << "update:";
-  for (int i = 0; i < 10; ++i) {
-      std::cout << grad_list[0][i] << " ";
-  }
-  std::cout << std::endl;
-
   std::cout << "ref param norm:" << std::get<0>(param_norm_tuple).item() << std::endl;
   std::cout << "ref update norm[0]:" << std::get<0>(update_norm_tuple).item() << std::endl;
   std::cout << "ref update norm[1]:" << std::get<1>(update_norm_tuple).item() << std::endl;
