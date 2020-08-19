@@ -34,8 +34,11 @@ struct LAMBStage1Functor
     // if(*noop_gmem == 1)
     //   return;
 
+    printf("tl sizes:");
+    for (int s : tl.sizes) {
+        printf("%d ", s);
+    }
     int tensor_loc = tl.block_to_tensor[blockIdx.x];
-    printf("tensor_loc:%d\n",tensor_loc);
     int tensor_num = tl.start_tensor_this_launch + tensor_loc;
     int chunk_idx = tl.block_to_chunk[blockIdx.x];
     int n = tl.sizes[tensor_loc];
@@ -43,7 +46,6 @@ struct LAMBStage1Functor
     float decay = per_tensor_decay[tensor_num];
 
     GRAD_T* g = (GRAD_T*)tl.addresses[0][tensor_loc];
-    printf("g[0]:%.8f\n",g[0]);
     g += chunk_idx*chunk_size;
 
     T* p = (T*)tl.addresses[1][tensor_loc];

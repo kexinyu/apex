@@ -145,7 +145,7 @@ struct LAMBStage1Functor
 #pragma unroll
         for(int ii = 0; ii < ILP; ii++)
         {
-          printf("r_p[ii]:.8f\n", r_p[ii]);
+          printf("r_p[ii]:%.8f\n", r_p[ii]);
 	  l_p[ii] = r_p[ii];
           l_m[ii] = r_m[ii];
           l_v[ii] = r_v[ii];
