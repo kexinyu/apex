@@ -34,6 +34,8 @@ struct LAMBStage1Functor
     // if(*noop_gmem == 1)
     //   return;
 
+    printf("chunk_size:%d\n", chunk_size);
+
     int tensor_loc = tl.block_to_tensor[blockIdx.x];
     int tensor_num = tl.start_tensor_this_launch + tensor_loc;
     int chunk_idx = tl.block_to_chunk[blockIdx.x];
@@ -58,6 +60,13 @@ struct LAMBStage1Functor
 
     n -= chunk_idx*chunk_size;
 
+    printf("g[0]:%.8f\n", g[0]);
+    printf("p[0]:%.8f\n", p[0]);
+    printf("m[0]:%.8f\n", m[0]);
+    printf("v[0]:%.8f\n", v[0]);
+    printf("u[0]:%.8f\n", update[0]);
+    printf("n:%d\n", n);
+
     // see note in multi_tensor_scale_kernel.cu
     for(int i_start = 0;
             i_start < n && i_start < chunk_size;
@@ -73,11 +82,13 @@ struct LAMBStage1Functor
         int i = i_start + threadIdx.x + ii*blockDim.x;
         if(i < n && i < chunk_size)
         {
-          r_g[ii] = g[i];
+	  printf("branch1\n");
+	  r_g[ii] = g[i];
           r_p[ii] = p[i];
           r_m[ii] = m[i];
           r_v[ii] = v[i];
         } else {
+          printf("branch2\n");
           r_g[ii] = GRAD_T(0);
           r_p[ii] = T(0);
           r_m[ii] = T(0);
@@ -94,7 +105,7 @@ struct LAMBStage1Functor
         T next_v_unbiased = r_v[ii] / beta2_correction;
         T denom = std::sqrt(next_v_unbiased) + epsilon;
         r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	printf("g:%f,clipped:%f,m:%f,v:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+	printf("g:%.8f,clipped:%f,m:%f,v:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
       }
 #pragma unroll
       for(int ii = 0; ii < ILP; ii++)
