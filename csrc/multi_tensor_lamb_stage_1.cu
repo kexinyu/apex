@@ -34,8 +34,6 @@ struct LAMBStage1Functor
     // if(*noop_gmem == 1)
     //   return;
 
-    printf("chunk_size:%d\n", chunk_size);
-
     int tensor_loc = tl.block_to_tensor[blockIdx.x];
     int tensor_num = tl.start_tensor_this_launch + tensor_loc;
     int chunk_idx = tl.block_to_chunk[blockIdx.x];
@@ -61,11 +59,6 @@ struct LAMBStage1Functor
     n -= chunk_idx*chunk_size;
 
     printf("g[0]:%.8f\n", g[0]);
-    printf("p[0]:%.8f\n", p[0]);
-    printf("m[0]:%.8f\n", m[0]);
-    printf("v[0]:%.8f\n", v[0]);
-    printf("u[0]:%.8f\n", update[0]);
-    printf("n:%d\n", n);
 
     // see note in multi_tensor_scale_kernel.cu
     for(int i_start = 0;
@@ -80,13 +73,9 @@ struct LAMBStage1Functor
       for(int ii = 0; ii < ILP; ii++)
       {
         int i = i_start + threadIdx.x + ii*blockDim.x;
-        if(i < n && i < chunk_size)
+        printf("g[0]:%.8f\n", g[0]);
+	if(i < n && i < chunk_size)
         {
-	  printf("branch1\n");
-	  printf("g[i]:%.8f\n", g[i]);
-          printf("p[i]:%.8f\n", p[i]);
-          printf("m[i]:%.8f\n", m[i]);
-          printf("v[i]:%.8f\n", v[i]);
 	  r_g[ii] = g[i];
           r_p[ii] = p[i];
           r_m[ii] = m[i];
