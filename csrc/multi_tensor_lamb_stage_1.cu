@@ -58,8 +58,6 @@ struct LAMBStage1Functor
 
     n -= chunk_idx*chunk_size;
 
-    printf("g[0]:%.8f\n", g[0]);
-
     // see note in multi_tensor_scale_kernel.cu
     for(int i_start = 0;
             i_start < n && i_start < chunk_size;
@@ -73,7 +71,6 @@ struct LAMBStage1Functor
       for(int ii = 0; ii < ILP; ii++)
       {
         int i = i_start + threadIdx.x + ii*blockDim.x;
-        printf("g[0]:%.8f\n", g[0]);
 	if(i < n && i < chunk_size)
         {
 	  r_g[ii] = g[i];
