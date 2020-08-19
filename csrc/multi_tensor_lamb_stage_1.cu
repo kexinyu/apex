@@ -70,7 +70,8 @@ struct LAMBStage1Functor
 #pragma unroll
       for(int ii = 0; ii < ILP; ii++)
       {
-        int i = i_start + threadIdx.x + ii*blockDim.x;
+	int i = i_start + threadIdx.x + ii*blockDim.x;
+	print("g[%d]: %.8f\n", i, g[i]);
 	if(i < n && i < chunk_size)
         {
 	  r_g[ii] = g[i];
@@ -94,7 +95,7 @@ struct LAMBStage1Functor
         T next_v_unbiased = r_v[ii] / beta2_correction;
         T denom = std::sqrt(next_v_unbiased) + epsilon;
         r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	printf("g:%.8f,clipped:%f,m:%f,v:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+	//printf("g:%.8f,clipped:%f,m:%f,v:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
       }
 #pragma unroll
       for(int ii = 0; ii < ILP; ii++)
