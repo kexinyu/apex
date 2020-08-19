@@ -35,6 +35,7 @@ struct LAMBStage1Functor
     //   return;
 
     int tensor_loc = tl.block_to_tensor[blockIdx.x];
+    printf("tensor_loc:%d\n",tensor_loc);
     int tensor_num = tl.start_tensor_this_launch + tensor_loc;
     int chunk_idx = tl.block_to_chunk[blockIdx.x];
     int n = tl.sizes[tensor_loc];
@@ -42,6 +43,7 @@ struct LAMBStage1Functor
     float decay = per_tensor_decay[tensor_num];
 
     GRAD_T* g = (GRAD_T*)tl.addresses[0][tensor_loc];
+    printf("g[0]:%.8f\n",g[0]);
     g += chunk_idx*chunk_size;
 
     T* p = (T*)tl.addresses[1][tensor_loc];
@@ -125,15 +127,15 @@ void multi_tensor_lamb_stage1_cuda(
 {
   using namespace at;
 
-  std::cout << "g_grad_norm:" << g_grad_norm << ", max_global_grad_norm:" << max_global_grad_norm << std::endl;
+  //std::cout << "g_grad_norm:" << g_grad_norm << ", max_global_grad_norm:" << max_global_grad_norm << std::endl;
   float clipped_global_grad_norm = g_grad_norm > max_global_grad_norm ? g_grad_norm / max_global_grad_norm : 1.0f;
-  std::cout << "clipped_global_grad_norm:" << clipped_global_grad_norm << std::endl;
+  //std::cout << "clipped_global_grad_norm:" << clipped_global_grad_norm << std::endl;
   float next_step = float(step+1);
-  std::cout << "next_step:" << next_step << std::endl;
+  //std::cout << "next_step:" << next_step << std::endl;
   float beta1_correction = 1.0f - std::pow(beta1, next_step);
   float beta2_correction = 1.0f - std::pow(beta2, next_step);
-  std::cout << "beta1_correction:" << beta1_correction << ", beta2_correction:" << beta2_correction << std::endl;
-  std::cout << "tensor_lists[0].size:" << tensor_lists[0].size() << ", tensor_lists[0][0]:" << tensor_lists[0][0] << std::endl;
+  //std::cout << "beta1_correction:" << beta1_correction << ", beta2_correction:" << beta2_correction << std::endl;
+  //std::cout << "tensor_lists[0].size:" << tensor_lists[0].size() << ", tensor_lists[0][0]:" << tensor_lists[0][0] << std::endl;
   DISPATCH_FLOAT_AND_HALF(tensor_lists[0][0].scalar_type(), 0, "lamb_stage_1",
     DISPATCH_FLOAT_AND_HALF(tensor_lists[1][0].scalar_type(), 1, "lamb_stage_1",
       DISPATCH_FLOAT_AND_HALF(tensor_lists[4][0].scalar_type(), 2, "lamb_stage_1",
