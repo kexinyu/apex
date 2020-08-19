@@ -83,12 +83,15 @@ struct LAMBStage1Functor
         if(i < n && i < chunk_size)
         {
 	  printf("branch1\n");
+	  printf("g[i]:%.8f\n", g[i]);
+          printf("p[i]:%.8f\n", p[i]);
+          printf("m[i]:%.8f\n", m[i]);
+          printf("v[i]:%.8f\n", v[i]);
 	  r_g[ii] = g[i];
           r_p[ii] = p[i];
           r_m[ii] = m[i];
           r_v[ii] = v[i];
         } else {
-          printf("branch2\n");
           r_g[ii] = GRAD_T(0);
           r_p[ii] = T(0);
           r_m[ii] = T(0);
@@ -161,7 +164,6 @@ void multi_tensor_lamb_stage1_cuda(
           epsilon,
           clipped_global_grad_norm); )))
 
-  std::cout << "stage 1 succeed" << std::endl;
   AT_CUDA_CHECK(cudaGetLastError());
 
   // AT_CUDA_CHECK(cudaDeviceSynchronize());
