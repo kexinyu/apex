@@ -71,7 +71,7 @@ struct LAMBStage1Functor
       for(int ii = 0; ii < ILP; ii++)
       {
 	int i = i_start + threadIdx.x + ii*blockDim.x;
-	print("g[%d]: %.8f\n", i, g[i]);
+	printf("g[%d]: %.8f\n", i, g[i]);
 	if(i < n && i < chunk_size)
         {
 	  r_g[ii] = g[i];
