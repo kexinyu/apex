@@ -140,7 +140,7 @@ struct LAMBStage1Functor
             MATH_T next_v_unbiased = r_v[ii] / beta2_correction;
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
             r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	    printf("g:%.8f,clipped:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, next_m_unbiased, next_v_unbiased, denom, r_p[ii])
+	    printf("g:%.8f,clipped:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
           }
         }
 #pragma unroll
