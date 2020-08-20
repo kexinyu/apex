@@ -219,13 +219,15 @@ struct DistOptLAMBStage1Functor
           }
           else {
             MATH_T scaled_grad = r_g[ii] / clipped_global_grad_norm;
+	    MATH_T old_m = r_m[ii];
+	    MATH_T old_v = r_v[ii];
             r_m[ii] = r_m[ii] * beta1 + beta3 * scaled_grad;
             r_v[ii] = r_v[ii] * beta2 + (1-beta2) * scaled_grad * scaled_grad;
             MATH_T next_m_unbiased = r_m[ii] / beta1_correction;
             MATH_T next_v_unbiased = r_v[ii] / beta2_correction;
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
             r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	    printf("g:%.8f,clipped:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+	    printf("g:%.8f,clipped:%f,old_m:%f,old_v:%f,new_m:%f, new_v:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,p:%f\n", r_g[ii], clipped_global_grad_norm, old_m, old_v, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
           }
         }
 #pragma unroll
