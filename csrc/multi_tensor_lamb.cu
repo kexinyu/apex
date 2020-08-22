@@ -152,6 +152,7 @@ struct LAMBStage1Functor
 	  l_p[ii] = r_p[ii];
           l_m[ii] = r_m[ii];
           l_v[ii] = r_v[ii];
+	  printf("r_m[ii]:%.8f,l_m[ii]:%.8f\n", r_m[ii], l_m[ii]);
         }
         // store
         load_store(g, l_p, i_start, 0);
