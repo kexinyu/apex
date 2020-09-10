@@ -1,0 +1,48 @@
+[1mdiff --git a/apex/contrib/optimizers/distributed_fused_adam_v4.py b/apex/contrib/optimizers/distributed_fused_adam_v4.py[m
+[1mindex 97fca51..ef2160a 100644[m
+[1m--- a/apex/contrib/optimizers/distributed_fused_adam_v4.py[m
+[1m+++ b/apex/contrib/optimizers/distributed_fused_adam_v4.py[m
+[36m@@ -582,3 +582,43 @@[m [mclass DistributedFusedAdam(torch.optim.Optimizer):[m
+         self._allgather_works = [None]*self._num_blocks[m
+ [m
+         return loss[m
+[32m+[m
+[32m+[m[32m    def state_dict(self):[m
+[32m+[m[32m        """[m
+[32m+[m[32m        Returns a dict containing the current state of this :class:`DistributedFusedAdam` instance.[m
+[32m+[m[32m        Example::[m
+[32m+[m[32m            checkpoint = {}[m
+[32m+[m[32m            checkpoint['model'] = model.state_dict()[m
+[32m+[m[32m            checkpoint['optimizer'] = optimizer.state_dict()[m
+[32m+[m[32m            torch.save(checkpoint, "saved.pth")[m
+[32m+[m[32m        """[m
+[32m+[m[32m        state_dict = super().state_dict()[m
+[32m+[m[32m        # save loss_scale, master weights and moments[m
+[32m+[m[32m        state_dict['loss_scale'] = self._global_scale[m
+[32m+[m[32m        state_dict['fp32_p'] = self._fp32_p[m
+[32m+[m[32m        state_dict['fp32_m'] = self._fp32_m[m
+[32m+[m[32m        state_dict['fp32_v'] = self._fp32_v[m
+[32m+[m[32m        return state_dict[m
+[32m+[m
+[32m+[m[32m    def load_state_dict(self, state_dict):[m
+[32m+[m[32m        """[m
+[32m+[m[32m        Loads a state_dict created by an earlier call to state_dict().[m
+[32m+[m[32m        If an DistributedFusedAdam instance was constructed from some ``init_optimizer``,[m
+[32m+[m[32m        whose parameters in turn came from ``model``, it is expected that the user[m
+[32m+[m[32m        will call ``model.load_state_dict()`` before[m
+[32m+[m[32m        ``optimizer.load_state_dict()`` is called.[m
+[32m+[m[32m        Example::[m
+[32m+[m[32m            model = torch.nn.Linear(D_in, D_out).cuda().half()[m
+[32m+[m[32m            optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)[m
+[32m+[m[32m            optimizer = FP16_Optimizer(optimizer, static_loss_scale = 128.0)[m
+[32m+[m[32m            ...[m
+[32m+[m[32m            checkpoint = torch.load("saved.pth")[m
+[32m+[m[32m            model.load_state_dict(checkpoint['model'])[m
+[32m+[m[32m            optimizer.load_state_dict(checkpoint['optimizer'])[m
+[32m+[m[32m        """[m
+[32m+[m[32m        super().load_state_dict(state_dict)[m
+[32m+[m[32m        # restore loss scale, master weights and moments[m
+[32m+[m[32m        self.set_global_scale(state_dict['loss_scale'])[m
+[32m+[m[32m        self._fp32_p.copy_(state_dict['fp32_p'])[m
+[32m+[m[32m        self._fp32_m.copy_(state_dict['fp32_m'])[m
+[32m+[m[32m        self._fp32_v.copy_(state_dict['fp32_v'])[m
