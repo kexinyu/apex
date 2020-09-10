@@ -141,8 +141,9 @@ struct LAMBStage1Functor
             MATH_T next_m_unbiased = r_m[ii] / beta1_correction;
             MATH_T next_v_unbiased = r_v[ii] / beta2_correction;
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
+	    MATH_T old_p = r_p[ii];
             r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	    printf("g:%.16f,clipped:%.8f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.10f,bc1:%.10f,bc2:%.10f,new_m:%.8f,new_v:%.8f,m_unbiased:%.8f,v_unbiased:%.8f,denom:%.8f,p:%.8f\n", r_g[ii], clipped_global_grad_norm, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+	    printf("g:%.16f,clipped:%.8f,old_p:%.8f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.10f,bc1:%.10f,bc2:%.10f,new_m:%.8f,new_v:%.8f,m_unbiased:%.8f,v_unbiased:%.8f,denom:%.8f,decay:%.8f,p:%.8f\n", r_g[ii], clipped_global_grad_norm, old_p, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, decay, r_p[ii]);
           }
         }
 #pragma unroll
