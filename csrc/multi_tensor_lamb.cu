@@ -143,8 +143,8 @@ struct LAMBStage1Functor
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
 	    MATH_T old_p = r_p[ii];
             r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	    if (i_strat == 0 && ii == 0) {
-                printf("tensor_loc:%d,tensor_num:%d,g:%.16f,clipped:%f,old_p:%.16f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.8f,new_v:%.8f,m_unbiased:%.8f,v_unbiased:%.8f,denom:%.8f,p:%.16f\n", tensor_loc, tensor_num, r_g[ii], clipped_global_grad_norm, old_p, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+	    if (i_start == 0 && ii == 0) {
+                printf("tensor_loc:%d,g:%.16f,clipped:%f,old_p:%.16f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.8f,new_v:%.8f,m_unbiased:%.8f,v_unbiased:%.8f,denom:%.8f,p:%.16f\n", tensor_loc, r_g[ii], clipped_global_grad_norm, old_p, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
             }
           }
         }
