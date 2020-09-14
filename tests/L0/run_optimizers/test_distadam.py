@@ -5,6 +5,9 @@ import random
 import torch
 import apex
 from itertools import product
+from apex import amp
+from apex.multi_tensor_apply import multi_tensor_applier
+import amp_C
 
 
 class TestFusedOptimizer(unittest.TestCase):
@@ -13,6 +16,8 @@ class TestFusedOptimizer(unittest.TestCase):
         self.max_rel_diff = max_rel_diff
         self.iters = iters
         torch.cuda.manual_seed(9876)
+        self.multi_tensor_l2norm=amp_C.multi_tensor_l2norm
+        self._overflow_buf = torch.cuda.IntTensor([0])
 
     def tearDown(self):
         pass
@@ -25,7 +30,9 @@ class TestFusedOptimizer(unittest.TestCase):
             tst_param.append(torch.nn.Parameter(tensor.clone()))
 
         ref_optim = self.ref_optim(ref_param, **options)
-        tst_optim = self.fused_optim(tst_param, **options)
+        #model, optimizer = amp.initialize(ref_param, ref_optim, opt_level="O2", loss_scale="dynamic", master_weights=True)
+        tst_optim = self.fused_optim(tst_param, compute_L2_grad_norm=True, flat_mt=True, overlap_reductions=False, dwu_group_size=1, **options)
+        tst_optim.set_global_scale(2**16)
 
         return (ref_param, tst_param, ref_optim, tst_optim)
 
@@ -59,11 +66,24 @@ class TestFusedOptimizer(unittest.TestCase):
         ref_param, tst_param, ref_optim, tst_optim = \
             self.gen_param_optim([tensor], self.options)
 
+        torch.set_printoptions(precision=16)
         for i in range(self.iters):
             self.gen_grad(ref_param, tst_param)
+            print("i:",i,", ref_grad:",ref_param[0].grad.data,",tst_grad:",tst_param[0].grad.data)
             ref_optim.step()
+            tst_optim._do_overlapped_reduction()
+            tst_optim.complete_reductions()
             tst_optim.step()
+            ref_param_norm = multi_tensor_applier(self.multi_tensor_l2norm,
+                                               self._overflow_buf,
+                                                [ref_param], True)[0]
+            print('ref param norm:', ref_param_norm)
+            tst_param_norm = multi_tensor_applier(self.multi_tensor_l2norm,
+                                               self._overflow_buf,
+                                                [tst_param], True)[0]
+            print('tst param norm:', tst_param_norm)
             max_abs_diff, max_rel_diff = self.get_max_diff(ref_param, tst_param)
+            print("i:",i,", max_abs_diff:",max_abs_diff,",max_rel_diff:",max_rel_diff)
             self.assertLessEqual(max_abs_diff, self.max_abs_diff)
             self.assertLessEqual(max_rel_diff, self.max_rel_diff)
 
@@ -75,8 +95,11 @@ class TestDistributedFusedAdam(TestFusedOptimizer):
         self.options = {'lr':5e-4, 'betas':(0.9, 0.999), 'eps':1e-08,
             'weight_decay': 0, 'amsgrad': False}
         #self.ref_optim = torch.optim.Adam
-        self.ref_optim = apex.optimizers.FusedAdam
-        from apex.contrib.optimizers.distributed_fused_adam import DistributedFusedAdam
+        #self.ref_optim = apex.optimizers.FusedAdam
+        from fused_adam import FusedAdam
+        self.ref_optim = FusedAdam
+        #from apex.contrib.optimizers.distributed_fused_adam import DistributedFusedAdam
+        from distributed_fused_adam import DistributedFusedAdam
         self.fused_optim = DistributedFusedAdam
 
     def test_float(self):
@@ -164,6 +187,7 @@ class TestDistributedFusedAdam(TestFusedOptimizer):
         for i in range(self.iters):
             self.gen_grad(ref_param, tst_param)
             ref_optim.step()
+            tst_optim._do_overlapped_reduction()
             tst_optim.complete_reductions()
             tst_optim.step()
             max_abs_diff, max_rel_diff = self.get_max_diff(ref_param, tst_param)
