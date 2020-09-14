@@ -294,7 +294,11 @@ struct LAMBStage2Functor
 #pragma unroll
         for(int ii = 0; ii < ILP; ii++)
         {
-          r_p[ii] = static_cast<MATH_T>(r_p[ii]) - (ratio * static_cast<MATH_T>(r_update[ii]));
+          MATH_T old_p = r_p[ii];
+	  r_p[ii] = static_cast<MATH_T>(r_p[ii]) - (ratio * static_cast<MATH_T>(r_update[ii]));
+          if (tensor_loc== 1 && i_start == 0 && ii == 0) {
+            printf("tensor_loc:%d,tensor_num:%d,old_p:%.16f,ratio:%.16f,update:%.16f,new_p:%.16f\n", tensor_loc, tensor_num, old_p, ratio, r_update[ii], r_p[ii]);
+          }
         }
         load_store(p, r_p, i_start, 0);
       }
