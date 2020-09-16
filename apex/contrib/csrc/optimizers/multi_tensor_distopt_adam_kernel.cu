@@ -104,7 +104,10 @@ struct DistAdamFunctor
         load_store(tmp_g, g, 0, i_start);
 #pragma unroll
         for (int ii = 0; ii < ILP; ii++) {
-          incoming_g[ii] = static_cast<T>(tmp_g[ii]);
+          T old_p = incoming_p[ii];
+	  T old_m = incoming_m[ii];
+	  T old_v = incoming_v[ii];
+	  incoming_g[ii] = static_cast<T>(tmp_g[ii]);
           T scaled_grad = incoming_g[ii]/grad_scale;
           incoming_m[ii] = b1*incoming_m[ii] + (1-b1)*scaled_grad;
           incoming_v[ii] = b2*incoming_v[ii] + (1-b2)*scaled_grad*scaled_grad;
@@ -115,6 +118,9 @@ struct DistAdamFunctor
             denom = sqrtf(incoming_v[ii]) + eps;
           float update = (incoming_m[ii]/denom) + (decay*incoming_p[ii]);
           incoming_p[ii] = incoming_p[ii] - (step_size*update);
+	  if (tensor_loc==1 && i_start == 0 && ii == 0) {
+            printf("tensor_loc:%d,tensor_num:%d,g:%.16f,grad_scale:%f,scaled_grad:%.16f,old_p:%.16f,old_m:%.8f,old_v:%.8f,b1:%.8f,b2:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.16f,new_v:%.16f,eps:%f,denom:%.16f,decay:%f,update:%.16f,step_size:%f,lr:%f,new_p:%.16f\n", tensor_loc, tensor_num, incoming_g[ii], grad_scale, scaled_grad, old_p, old_m, old_v, b1, b2, bias_correction1, bias_correction1, incoming_m[ii], incoming_v[ii], eps, denom, decay, update, step_size, lr, incoming_p[ii]);
+          }
           if (DEPTH == 5)  tmp_g[ii] = static_cast<GRAD_T>(incoming_p[ii]);
         }
         load_store(p, incoming_p, i_start, 0);
