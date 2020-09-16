@@ -118,7 +118,7 @@ struct DistAdamFunctor
             denom = sqrtf(incoming_v[ii]) + eps;
           float update = (incoming_m[ii]/denom) + (decay*incoming_p[ii]);
           incoming_p[ii] = incoming_p[ii] - (step_size*update);
-	  float tmp = step_size*decay*incoming_p[ii];
+	  float tmp = step_size*update;
 	  if (tensor_loc==1 && i_start == 0 && ii == 0) {
             printf("tensor_loc:%d,tensor_num:%d,g:%f,old_p:%f,old_m:%f,old_v:%f,new_m:%f,new_v:%f,denom:%f,update:%f,new_p:%.12f, tmp:%.12f\n", tensor_loc, tensor_num, incoming_g[ii], old_p, old_m, old_v, incoming_m[ii], incoming_v[ii], denom, update, incoming_p[ii], tmp);
           }
