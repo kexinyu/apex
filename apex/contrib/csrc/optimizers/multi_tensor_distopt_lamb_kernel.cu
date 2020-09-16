@@ -160,7 +160,7 @@ struct DistOptLAMBStage1Functor
     T* v = (T*)tl.addresses[3][tensor_loc];
     v += chunk_idx*chunk_size;
 
-    T* u = (T*)tl.addresses[4][tensor_loc];
+    MATH_T* u = (MATH_T*)tl.addresses[4][tensor_loc];
     u += chunk_idx*chunk_size;
 
     n -= chunk_idx*chunk_size;
@@ -236,12 +236,11 @@ struct DistOptLAMBStage1Functor
 #pragma unroll
         for(int ii = 0; ii < ILP; ii++)
         {
-          l_p[ii] = r_p[ii];
 	  l_m[ii] = r_m[ii];
           l_v[ii] = r_v[ii];
         }
         // store
-        load_store(u, l_p, i_start, 0);
+        load_store(u, r_p, i_start, 0);
         load_store(m, l_m, i_start, 0);
         load_store(v, l_v, i_start, 0);
       }
