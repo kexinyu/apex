@@ -160,7 +160,7 @@ struct DistOptLAMBStage1Functor
     T* v = (T*)tl.addresses[3][tensor_loc];
     v += chunk_idx*chunk_size;
 
-    MATH_T* u = (MATH_T*)tl.addresses[4][tensor_loc];
+    T* u = (T*)tl.addresses[4][tensor_loc];
     u += chunk_idx*chunk_size;
 
     n -= chunk_idx*chunk_size;
