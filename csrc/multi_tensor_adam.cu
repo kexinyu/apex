@@ -113,7 +113,7 @@ struct AdamFunctor
           MATH_T update = (next_m_unbiased / denom) + (decay * r_p[ii]);
           r_p[ii] = r_p[ii] - (lr * update);
 	  if (tensor_loc==1 && i_start == 0 && ii == 0) {
-            printf("tensor_loc:%d,g:%.12f,old_p:%.12f,old_m:%.8f,old_v:%.8f,beta1:%f,beta2:%f,b1c:%f,b2c:%f,new_m:%.8f,new_v:%.8f,m_unbiased:%.8f,v_unbiased:%.8f,eps:%f,denom:%.12f,decay:%f,update:%.12f,lr:%f,new_p:%.12f\n", tensor_loc, r_g[ii], old_p, old_m, old_v, beta1, beta2, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, epsilon, denom, decay, update, lr, r_p[ii]);
+            printf("tensor_loc:%d,g:%f,old_p:%f,old_m:%f,old_v:%f,beta1:%f,beta2:%f,b1c:%f,b2c:%f,new_m:%f,new_v:%f,denom:%f,update:%f,lr:%f,new_p:%f\n", tensor_loc, r_g[ii], old_p, old_m, old_v, beta1, beta2, beta1_correction, beta2_correction, r_m[ii], r_v[ii], denom, update, lr, r_p[ii]);
           }
         }
       }
