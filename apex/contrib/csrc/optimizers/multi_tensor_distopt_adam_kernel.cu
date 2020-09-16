@@ -119,7 +119,7 @@ struct DistAdamFunctor
           float update = (incoming_m[ii]/denom) + (decay*incoming_p[ii]);
           incoming_p[ii] = incoming_p[ii] - (step_size*update);
 	  if (tensor_loc==1 && i_start == 0 && ii == 0) {
-            printf("tensor_loc:%d,tensor_num:%d,g:%.16f,grad_scale:%f,scaled_grad:%.16f,old_p:%.16f,old_m:%.8f,old_v:%.8f,b1:%.8f,b2:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.16f,new_v:%.16f,eps:%f,denom:%.16f,decay:%f,update:%.16f,step_size:%f,lr:%f,new_p:%.16f\n", tensor_loc, tensor_num, incoming_g[ii], grad_scale, scaled_grad, old_p, old_m, old_v, b1, b2, bias_correction1, bias_correction1, incoming_m[ii], incoming_v[ii], eps, denom, decay, update, step_size, lr, incoming_p[ii]);
+            printf("tensor_loc:%d,tensor_num:%d,g:%.12f,grad_scale:%f,scaled_grad:%.12f,old_p:%.12f,old_m:%.8f,old_v:%.8f,b1:%f,b2:%f,b1c:%f,b2c:%f,new_m:%.8f,new_v:%.8f,eps:%f,denom:%.12f,decay:%f,update:%.12f,step_size:%f,lr:%f,new_p:%.12f\n", tensor_loc, tensor_num, incoming_g[ii], grad_scale, scaled_grad, old_p, old_m, old_v, b1, b2, bias_correction1, bias_correction1, incoming_m[ii], incoming_v[ii], eps, denom, decay, update, step_size, lr, incoming_p[ii]);
           }
           if (DEPTH == 5)  tmp_g[ii] = static_cast<GRAD_T>(incoming_p[ii]);
         }
