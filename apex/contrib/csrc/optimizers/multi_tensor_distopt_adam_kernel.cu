@@ -155,15 +155,17 @@ struct DistAdamFunctor
 
           if (j < n && j < chunk_size) {
             T scaled_grad = incoming_g[ii]/grad_scale;
-            m[j] = b1*incoming_m[ii] + (1-b1)*scaled_grad;
-            v[j] = b2*incoming_v[ii] + (1-b2)*scaled_grad*scaled_grad;
-            float denom;
+            m[j] = b1 * incoming_m[ii] + (1-b1) * scaled_grad;
+            v[j] = b2 * incoming_v[ii] + (1-b2) * scaled_grad*scaled_grad;
+            T next_m_unbiased = m[j] / beta1_correction;
+            T next_v_unbiased = v[j] / beta2_correction;
+	    float denom;
             if (mode == ADAM_MODE_0)
-              denom = sqrtf(v[j] + eps);
+              denom = sqrtf(next_v_unbiased + eps);
             else // Mode 1
-              denom = sqrtf(v[j]) + eps;
-            float update = (m[j]/denom) + (decay*incoming_p[ii]);
-            p[j] = incoming_p[ii] - (step_size*update);
+              denom = sqrtf(next_v_unbiased) + eps;
+            float update = (next_m_unbiased / denom) + (decay * incoming_p[ii]);
+            p[j] = incoming_p[ii] - (lr * update);
             if (DEPTH == 5)  p_copy[j] = (GRAD_T) p[j];
           }
         }
