@@ -387,7 +387,7 @@ struct DistOptLAMBStage2Functor
 	  r_p[ii] = static_cast<MATH_T>(r_p[ii]) - (ratio * r_update[ii]);
           convert(r_p[ii], r_p_copy[ii]);
 	  if (tensor_loc== 1 && i_start == 0 && ii == 0) {
-            printf("tensor_loc:%d,tensor_num:%d,old_p:%.16f,ratio:%.16f,update:%.16f,new_p:%.16f,new_p_copy:%.16f\n", tensor_loc, tensor_num, old_p, ratio, r_update[ii], r_p[ii], r_p_copy[ii]);
+            printf("tensor_loc:%d,tensor_num:%d,old_p:%.16f,ratio:%.16f,update:%.16f,new_p:%.16f,new_p_copy:%.16f\n", tensor_loc, tensor_num, old_p, ratio, r_update[ii], r_p[ii], (MATH_T) r_p_copy[ii]);
           }
         }
         load_store(p, r_p, i_start, 0);
