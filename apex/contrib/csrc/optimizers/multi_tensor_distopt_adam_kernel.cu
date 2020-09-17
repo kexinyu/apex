@@ -115,11 +115,11 @@ struct DistAdamFunctor
             denom = sqrtf(next_v_unbiased + eps);
           else // Mode 1
             denom = sqrtf(next_v_unbiased) + eps;
-          float update = (next_v_unbiased / denom) + (decay * incoming_p[ii]);
+          float update = (next_m_unbiased / denom) + (decay * incoming_p[ii]);
           incoming_p[ii] = incoming_p[ii] - (lr * update);
-	  float tmp = lr * update;
+	  float prod = lr * update;
 	  if (tensor_loc==1 && i_start == 0 && ii == 0) {
-            printf("tensor_loc:%d,tensor_num:%d,g:%f,old_p:%f,old_m:%f,old_v:%f,new_m:%f,new_v:%f,denom:%f,update:%f,new_p:%.12f, tmp:%.12f\n", tensor_loc, tensor_num, incoming_g[ii], old_p, old_m, old_v, incoming_m[ii], incoming_v[ii], denom, update, incoming_p[ii], tmp);
+            printf("tensor_loc:%d,tensor_num:%d,g:%f,old_p:%f,old_m:%f,old_v:%f,new_m:%f,new_v:%f,m_unbiased:%f,v_unbiased:%f,denom:%f,update:%f,new_p:%.12f, tmp:%.12f\n", tensor_loc, tensor_num, incoming_g[ii], old_p, old_m, old_v, incoming_m[ii], incoming_v[ii], next_m_unbiased, next_v_unbiased, denom, update, incoming_p[ii], prod);
           }
           if (DEPTH == 5)  tmp_g[ii] = static_cast<GRAD_T>(incoming_p[ii]);
         }
