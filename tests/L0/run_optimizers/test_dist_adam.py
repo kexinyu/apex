@@ -39,9 +39,9 @@ def setup(args):
 
     dist_opt_args = ref_opt_args.copy()
     dist_opt_args.update( {'overlap_reductions' : False} )
-    dist_opt_args.update( {'process_group_size' : 1} )
+    dist_opt_args.update( {'process_group_size' : args.n_gpu} )
     dist_opt_args.update( {'dwu_group_size' : 1} )
-    dist_opt_args.update( {'dwu_num_blocks' : 1} )
+    dist_opt_args.update( {'dwu_num_blocks' : 4} )
     dist_opt_args.update( {'dwu_num_chunks' : 1} )
     dist_opt = DistributedFusedAdam(dist_model.parameters(), **dist_opt_args)
     dist_opt.set_global_scale(1.)
@@ -74,7 +74,7 @@ def parse_args():
     parser.add_argument('--dim', type=int, default=4)
     parser.add_argument('--layers', type=int, default=2)
     parser.add_argument('--bias', action='store_true')
-    parser.add_argument('--atol', type=float, default=1e-3)
+    parser.add_argument('--atol', type=float, default=1e-2)
     parser.add_argument('--rtol', type=float, default=1)
 
     args = parser.parse_args()
