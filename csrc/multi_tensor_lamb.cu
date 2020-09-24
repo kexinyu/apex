@@ -133,12 +133,18 @@ struct LAMBStage1Functor
           }
           else {
             MATH_T scaled_grad = r_g[ii] / clipped_global_grad_norm;
+	    MATH_T old_p = r_p[ii];
+	    MATH_T old_m = r_m[ii];
+	    MATH_T old_v = r_v[ii];
             r_m[ii] = r_m[ii] * beta1 + beta3 * scaled_grad;
             r_v[ii] = r_v[ii] * beta2 + (1-beta2) * scaled_grad * scaled_grad;
             MATH_T next_m_unbiased = r_m[ii] / beta1_correction;
             MATH_T next_v_unbiased = r_v[ii] / beta2_correction;
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
             r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
+	    if (tensor_loc==1 && i_start == 0 && ii == 0) {
+                printf("tensor_loc:%d,g:%.16f,clipped:%f,scaled_grad:%.16f,old_p:%.16f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.16f,new_v:%.16f,m_unbiased:%.16f,v_unbiased:%.16f,denom:%.16f,p:%.16f\n", tensor_loc, r_g[ii], clipped_global_grad_norm, scaled_grad, old_p, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+            }
           }
         }
 #pragma unroll
@@ -286,7 +292,11 @@ struct LAMBStage2Functor
 #pragma unroll
         for(int ii = 0; ii < ILP; ii++)
         {
-          r_p[ii] = static_cast<MATH_T>(r_p[ii]) - (ratio * static_cast<MATH_T>(r_update[ii]));
+          MATH_T old_p = r_p[ii];
+	  r_p[ii] = static_cast<MATH_T>(r_p[ii]) - (ratio * static_cast<MATH_T>(r_update[ii]));
+	  if (tensor_loc== 1 && i_start == 0 && ii == 0) {
+            printf("tensor_loc:%d,tensor_num:%d,old_p:%.16f,ratio:%.16f,update:%.16f,new_p:%.16f\n", tensor_loc, tensor_num, old_p, ratio, r_update[ii], r_p[ii]);
+          }
         }
         load_store(p, r_p, i_start, 0);
       }
