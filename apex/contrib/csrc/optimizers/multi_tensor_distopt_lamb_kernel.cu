@@ -349,7 +349,10 @@ struct DistOptLAMBStage2Functor
     {
       MATH_T param_norm = per_tensor_param_norm[tensor_num];
       MATH_T update_norm = per_tensor_update_norm[tensor_num];
-      ratio = (update_norm != (MATH_T) 0.0 && param_norm != (MATH_T) 0.0) ? learning_rate * (param_norm / update_norm) : learning_rate;
+      ratio = (update_norm != 0.0 && param_norm != 0.0) ? learning_rate * (param_norm / update_norm) : learning_rate;
+      if (tensor_loc==1) {
+        printf("tensor_loc:%d,tensor_num:%d,learning_rate:%f,param_norm:%.8f,update_norm:%.8f,ratio:%.16f\n", tensor_loc, tensor_num, learning_rate, param_norm, update_norm, ratio);
+      }
     }
 
     MATH_T* update = (MATH_T*)tl.addresses[0][tensor_loc];
