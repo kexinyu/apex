@@ -133,11 +133,11 @@ struct DistOptLAMBStage1Functor
 
     MATH_T beta1 = per_tensor_beta1[tensor_num];
     MATH_T beta2 = per_tensor_beta2[tensor_num];
-    MATH_T beta3 = per_tensor_beta3[tensor_num];
+    MATH_T beta3 = 1 - beta1; //per_tensor_beta3[tensor_num];
     MATH_T beta1_correction, beta2_correction;
     if (per_tensor_bias_correction[tensor_num] == 1) {
-        beta1_correction = 1 - pow(beta1, (MATH_T) step);
-        beta2_correction = 1 - pow(beta2, (MATH_T) step);
+        beta1_correction = 1 - pow(beta1, step);
+        beta2_correction = 1 - pow(beta2, step);
     } else {
         beta1_correction = (MATH_T) 1.0;
         beta2_correction = (MATH_T) 1.0;
