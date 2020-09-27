@@ -267,7 +267,7 @@ struct LAMBStage2Functor
       float update_norm = per_tensor_update_norm[tensor_num];
       ratio = (update_norm != 0.0f && param_norm != 0.0f) ? learning_rate * (param_norm / update_norm) : learning_rate;
       if (tensor_loc==1) {
-        printf("tensor_loc:%d,tensor_num:%d,learning_rate:%f,param_norm:%.8f,update_norm:%.8f,ratio:%.16f\n", tensor_loc, tensor_num, learning_rate, param_norm, update_norm, ratio);
+        printf("tensor_loc:%d,tensor_num:%d,lr:%f,param_norm:%.8f,update_norm:%.8f,ratio:%.12f\n", tensor_loc, tensor_num, learning_rate, param_norm, update_norm, ratio);
       }
     }
 
