@@ -445,7 +445,7 @@ void multi_tensor_lamb_compute_update_term_cuda(
   at::Tensor per_tensor_epsilon,
   const int mode,
   at::Tensor per_tensor_decay,
-  const float grad_global_norm,
+  const float global_grad_norm,
   const float grad_scale)
 {
   using namespace at;
@@ -467,6 +467,7 @@ void multi_tensor_lamb_compute_update_term_cuda(
           per_tensor_epsilon.DATA_PTR<scalar_t_2>(),
           (adamMode_t) mode,
           per_tensor_decay.DATA_PTR<scalar_t_2>(),
+	  global_grad_norm,
           grad_scale); )))
 
   AT_CUDA_CHECK(cudaGetLastError());
