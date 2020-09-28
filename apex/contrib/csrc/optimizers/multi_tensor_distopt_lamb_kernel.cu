@@ -120,6 +120,7 @@ struct DistOptLAMBStage1Functor
     const MATH_T* per_tensor_epsilon,
     adamMode_t mode,
     const MATH_T* per_tensor_decay,
+    const float global_grad_norm,
     const float grad_scale)
   {
     // I'd like this kernel to propagate infs/nans.
@@ -226,7 +227,7 @@ struct DistOptLAMBStage1Functor
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
 	    r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
 	    if (tensor_loc == 1 && i_start == 0 && ii == 0) {
-	        printf("tensor_loc:%d,tensor_num:%d,g:%.16f,grad_scale:%f,scaled_grad:%.16f,old_p:%.16f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.16f,new_v:%.16f,m_unbiased:%.16f,v_unbiased:%.16f,denom:%.16f,p:%.16f\n", tensor_loc, tensor_num, r_g[ii], grad_scale, scaled_grad, old_p, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
+	        printf("tensor_loc:%d,tensor_num:%d,g:%.16f,global_grad_norm:%.8f,grad_scale:%f,scaled_grad:%.16f,old_p:%.16f,old_m:%.8f,old_v:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.16f,new_v:%.16f,m_unbiased:%.16f,v_unbiased:%.16f,denom:%.16f,p:%.16f\n", tensor_loc, tensor_num, r_g[ii], global_grad_norm, grad_scale, scaled_grad, old_p, old_m, old_v, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
 	    }
           }
         }
@@ -444,6 +445,7 @@ void multi_tensor_lamb_compute_update_term_cuda(
   at::Tensor per_tensor_epsilon,
   const int mode,
   at::Tensor per_tensor_decay,
+  const float grad_global_norm,
   const float grad_scale)
 {
   using namespace at;
