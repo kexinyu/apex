@@ -507,7 +507,6 @@ class DistributedFusedLAMB(torch.optim.Optimizer):
                     self._contrib_epsilon,
                     self._adam_w_mode,
                     self._contrib_weight_decay,
-                    global_grad_norm,
                     combined_scale)
             upd_norm = self.__compute_contrib_update_norm()
             multi_tensor_applier(self.multi_tensor_lamb_update_weights,
