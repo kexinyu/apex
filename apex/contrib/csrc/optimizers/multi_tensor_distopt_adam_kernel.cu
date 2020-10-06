@@ -121,6 +121,9 @@ struct DistAdamFunctor
         load_store(m, incoming_m, i_start, 0);
         load_store(v, incoming_v, i_start, 0);
         if (DEPTH == 5) load_store(p_copy, tmp_g, i_start, 0);
+        if (tensor_loc == 1 && tensor_num == 1 && i_start == 0) {
+            printf("tensor_loc:%d,tensor_num:%d,p[0]:%.16f,tmp_g[0]:%.16f,p_copy[0]:%.16f\n", tensor_loc, tensor_num, p[0], tmp_g[0], p_copy[0]);
+          }
       }
     } else {
       for (int i_start = 0;
