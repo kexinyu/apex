@@ -554,9 +554,6 @@ __global__ void maybe_cast_kernel(
 #pragma unroll
         for(int ii = 0; ii < ILP; ii++) {
 	    convert(pi[ii], po[ii]);
-	    if (ii == 0) {
-	      printf("i:%d,pi[0]:%d,pi[0] float:%.16f,po[0]:%.16f\n", i, pi[ii], (float) pi[ii], (float) po[ii]);
-	    }
         }
 
 #pragma unroll
@@ -779,6 +776,9 @@ struct MaybeCastFunctor
                 if (j < dim) {
                     p_out[j] = po[ii];
                 }
+            }
+	    if (tensor_loc == 0) {
+              printf("p_in[0]:%d,p_in[0] float:%.16f,pi[0]:%d,pi[0] float:%.16f,po[0]:%.16f,p_out[0]:%.16f\n", p_in[0], (float) p_in[0], pi[0], (float) pi[0], (float) po[0], (float) p_out[0]);
             }
         }
     }
