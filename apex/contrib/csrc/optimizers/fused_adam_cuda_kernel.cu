@@ -775,10 +775,10 @@ struct MaybeCastFunctor
                 int j = j_start + threadIdx.x + ii*blockDim.x;
                 if (j < dim) {
                     p_out[j] = po[ii];
+		    if (tensor_loc == 0) {
+                      printf("ii:%d,j:%d,p_in[ii]:%d,p_in[ii] float:%.16f,pi[ii]:%d,pi[ii] float:%.16f,po[ii]:%.16f,p_out[ii]:%.16f\n", ii, j, p_in[ii], (float) p_in[ii], pi[ii], (float) pi[ii], (float) po[ii], (float) p_out[j]);
+                    }
                 }
-            }
-	    if (tensor_loc == 0) {
-              printf("p_in[0]:%d,p_in[0] float:%.16f,pi[0]:%d,pi[0] float:%.16f,po[0]:%.16f,p_out[0]:%.16f\n", p_in[0], (float) p_in[0], pi[0], (float) pi[0], (float) po[0], (float) p_out[0]);
             }
         }
     }
