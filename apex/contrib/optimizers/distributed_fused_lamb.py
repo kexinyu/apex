@@ -486,7 +486,7 @@ class DistributedFusedLAMB(torch.optim.Optimizer):
         max_grad_norm = self.defaults['max_grad_norm']
         global_grad_norm = self.L2_grad_norm
         if self._clip_grad_norm and max_grad_norm > 0 and math.isfinite(global_grad_norm):
-            combined_scale = max_grad_norm / (global_grad_norm / self.global_scale + 1e-6)
+            combined_scale = max_grad_norm / (global_grad_norm / self.global_scale + 0)# 1e-6)
             combined_scale = self.global_scale / min(1, combined_scale)
 
         # Call step kernel once per step
