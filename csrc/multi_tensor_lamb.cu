@@ -141,7 +141,7 @@ struct LAMBStage1Functor
             MATH_T next_v_unbiased = r_v[ii] / beta2_correction;
             MATH_T denom = sqrtf(next_v_unbiased) + epsilon;
             r_p[ii] = (next_m_unbiased/denom) + (decay*r_p[ii]);
-	    if (true) { //tensor_loc==1 && i_start == 0 && ii == 0) {
+	    if (tensor_loc==1 && i_start == 0 && ii == 0) {
                 printf("tensor_loc:%d,g:%.16f,global_grad_norm:%.8f,clipped:%f,scaled_grad:%.16f,old_p:%.16f,old_m:%.8f,beta1:%.8f,beta2:%.8f,beta3:%.8f,b1c:%.8f,b2c:%.8f,new_m:%.16f,new_v:%.16f,m_unbiased:%.16f,v_unbiased:%.16f,denom:%.16f,p:%.16f\n", tensor_loc, r_g[ii], (*global_grad_norm), clipped_global_grad_norm, scaled_grad, old_p, old_m, beta1, beta2, beta3, beta1_correction, beta2_correction, r_m[ii], r_v[ii], next_m_unbiased, next_v_unbiased, denom, r_p[ii]);
             }
           }
@@ -265,7 +265,7 @@ struct LAMBStage2Functor
       float param_norm = per_tensor_param_norm[tensor_num];
       float update_norm = per_tensor_update_norm[tensor_num];
       ratio = (update_norm != 0.0f && param_norm != 0.0f) ? learning_rate * (param_norm / update_norm) : learning_rate;
-      if (true) { //tensor_loc==1) {
+      if (tensor_loc==1) {
         printf("tensor_loc:%d,tensor_num:%d,lr:%f,param_norm:%.8f,update_norm:%.8f,ratio:%.12f\n", tensor_loc, tensor_num, learning_rate, param_norm, update_norm, ratio);
       }
     }
@@ -296,7 +296,7 @@ struct LAMBStage2Functor
         {
           MATH_T old_p = r_p[ii];
 	  r_p[ii] = static_cast<MATH_T>(r_p[ii]) - (ratio * static_cast<MATH_T>(r_update[ii]));
-	  if (true) { //tensor_loc== 1 && i_start == 0 && ii == 0) {
+	  if (tensor_loc== 1 && i_start == 0 && ii == 0) {
             printf("tensor_loc:%d,tensor_num:%d,old_p:%.16f,ratio:%.16f,update:%.16f,new_p:%.16f\n", tensor_loc, tensor_num, old_p, ratio, (float) r_update[ii], (float) r_p[ii]);
           }
         }
