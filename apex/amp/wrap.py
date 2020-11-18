@@ -22,6 +22,7 @@ def make_cast_wrapper(orig_fn, cast_fn, handle,
             for k in kwargs:
                 if utils.should_cache(kwargs[k]):
                     kwargs[k] = utils.cached_cast(cast_fn, kwargs[k], handle.cache)
+        print("amp cast:", cast_fn)
         new_args = utils.casted_args(cast_fn,
                                      args,
                                      kwargs)
