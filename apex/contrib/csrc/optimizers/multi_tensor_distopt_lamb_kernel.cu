@@ -132,7 +132,7 @@ struct DistOptLAMBStage1Functor
     int n = tl.sizes[tensor_loc];
 
     if (tensor_loc == 1 and tensor_num == 1) {
-        printf("grad_scale:%.8f\n", grad_scale)
+        printf("grad_scale:%.8f\n", grad_scale);
     }
 
     MATH_T beta1 = per_tensor_beta1[tensor_num];
