@@ -534,7 +534,7 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                     scale)
             self._grads = []
 
-    def _do_overlapped_reduction(self, param_i, param_grads_size, param_offset, param):
+    def _do_overlapped_reduction(self, param_i, param):
         # handle overlapped reductions
         if self._flat_mt:
             self._grads.append( (param.grad, self._individual_flat_grads[param_i]) )
